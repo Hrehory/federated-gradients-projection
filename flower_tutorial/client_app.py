@@ -27,6 +27,7 @@ def train(msg: Message, context: Context):
     num_partitions = context.node_config["num-partitions"]
     trainloader, _ = load_data(partition_id, num_partitions)
 
+    print(10*'=' + ' LOCAL TRAIN ' + 10*'=' + str(msg.content["config"]["lr"]))
     # Call the training function
     train_loss = train_fn(
         model,
@@ -50,6 +51,9 @@ def train(msg: Message, context: Context):
 @app.evaluate()
 def evaluate(msg: Message, context: Context):
     """Evaluate the model on local data."""
+
+    print(10*'=' + ' LOCAL EVALUATE ' + 10*'=') 
+
 
     # Load the model and initialize it with the received weights
     model = Net()

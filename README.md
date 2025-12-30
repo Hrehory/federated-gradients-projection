@@ -1,5 +1,23 @@
 # flower-tutorial: A Flower / PyTorch app
 
+
+## Badania
+
+### 30.12.2025
+
+Przy: flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3"
+
+Wszystko jest OK , natomiast:
+
+flwr run . --run-config="strategy='custom' lr=0.1 num-server-rounds=8"
+
+Model się nie trenuje dla przypadku bez BatchNorm.
+
+Co ciekawe, przy podmianie CustomFedAdagrad(FedAvg) -> CustomFedAdagrad(FedAdagrad), model z BatchNorm powoduje błąd:
+
+TypeError: Invalid arguments for Array. Expected either a PyTorch tensor, a NumPy ndarray, or explicit dtype/shape/stype/data values.
+
+
 ## Install dependencies and project
 
 The dependencies are listed in the `pyproject.toml` and you can install them as follows:
