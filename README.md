@@ -3,6 +3,14 @@
 
 ## Badania
 
+### 31.12.2025
+
+Brak badań, poprawki, by działał Fedadagrad i by można było podać w cmd model-type='standard'/'bn':
+
+flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3 model-type='standard'"
+
+
+
 ### 30.12.2025
 
 Przy: flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3"
@@ -23,8 +31,40 @@ TypeError: Invalid arguments for Array. Expected either a PyTorch tensor, a NumP
 The dependencies are listed in the `pyproject.toml` and you can install them as follows:
 
 ```bash
-pip install -e .
+~pip install -e .~
+
+uv pip install --no-cache "flwr[simulation]==1.25.0"
+
+uv pip install -e .
+
+
+cat > .rayignore <<EOF
+.venv
+venv
+venv.tar.gz
+.git
+__pycache__
+*.pt
+*.pth
+*.ckpt
+*.zip
+EOF
+
+
 ```
+
+Można uruchomić:
+
+```bash
+uv run --active flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3 model-type='standard'" 
+```
+
+lub:
+
+```bash
+flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3 model-type='standard'" 
+```
+
 
 > **Tip:** Your `pyproject.toml` file can define more than just the dependencies of your Flower app. You can also use it to specify hyperparameters for your runs and control which Flower Runtime is used. By default, it uses the Simulation Runtime, but you can switch to the Deployment Runtime when needed.
 > Learn more in the [TOML configuration guide](https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html).

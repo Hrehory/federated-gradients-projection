@@ -4,7 +4,7 @@ import torch
 from flwr.app import ArrayRecord, Context, Message, MetricRecord, RecordDict
 from flwr.clientapp import ClientApp
 
-from flower_tutorial.task import Net, load_data
+from flower_tutorial.task import Net, NetBN, load_data
 from flower_tutorial.task import test as test_fn
 from flower_tutorial.task import train as train_fn
 
@@ -17,7 +17,13 @@ def train(msg: Message, context: Context):
     """Train the model on local data."""
 
     # Load the model and initialize it with the received weights
-    model = Net()
+    if context.run_config["model-type"] == "bn":
+        print('Client: Using BatchNorm model')
+        model = NetBN()
+    else:       
+        print('Client: Using standard model')
+        model = Net()
+
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -38,7 +44,10 @@ def train(msg: Message, context: Context):
     )
 
     # Construct and return reply Message
-    model_record = ArrayRecord(model.state_dict())
+
+
+    #model_record = ArrayRecord(model.state_dict())
+    model_record = ArrayRecord(strip_bn_buffers(model.state_dict()))
     metrics = {
         "train_loss": train_loss,
         "num-examples": len(trainloader.dataset),
@@ -56,7 +65,12 @@ def evaluate(msg: Message, context: Context):
 
 
     # Load the model and initialize it with the received weights
-    model = Net()
+    if context.run_config["model-type"] == "bn":
+        print('Client eval: Using BatchNorm model')
+        model = NetBN()
+    else:       
+        print('Client eval: Using standard model')
+        model = Net()
     model.load_state_dict(msg.content["arrays"].to_torch_state_dict())
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -82,3 +96,9 @@ def evaluate(msg: Message, context: Context):
     metric_record = MetricRecord(metrics)
     content = RecordDict({"metrics": metric_record})
     return Message(content=content, reply_to=msg)
+
+def strip_bn_buffers(state_dict):
+    return {
+        k: v for k, v in state_dict.items()
+        if "num_batches_tracked" not in k
+    }

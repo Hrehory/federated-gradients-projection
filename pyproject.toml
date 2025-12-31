@@ -19,6 +19,7 @@ dependencies = [
     "torch>=2.7.1",
     "torchvision>=0.22.1",
 ]
+requires-python = ">=3.11,<3.14"
 
 [tool.hatch.build.targets.wheel]
 packages = ["."]
@@ -41,6 +42,7 @@ fraction-custom-evaluate = 0.05 # <-- updated
 local-epochs = 10
 lr = 0.01
 batch-size = 32
+model-type = "bn"  # "standard" or "bn"
 
 # Default federation to use when running the app
 [tool.flwr.federations]

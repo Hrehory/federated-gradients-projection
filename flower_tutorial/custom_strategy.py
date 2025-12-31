@@ -4,7 +4,7 @@ from flwr.serverapp.strategy import FedAdagrad, FedAvg
 from flwr.app import ArrayRecord, ConfigRecord, Message
 
 
-class CustomFedAdagrad(FedAvg):
+class CustomFedAdagrad(FedAdagrad):
     def configure_train(
         self, server_round: int, arrays: ArrayRecord, config: ConfigRecord, grid: Grid
     ) -> Iterable[Message]:

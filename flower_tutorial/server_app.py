@@ -5,9 +5,11 @@ from flwr.app import ArrayRecord, ConfigRecord, Context, MetricRecord
 from flwr.serverapp import Grid, ServerApp
 from flwr.serverapp.strategy import FedAvg
 
-from flower_tutorial.task import Net, load_centralized_dataset, test
+from flower_tutorial.task import Net, NetBN, load_centralized_dataset, test
 
 from flower_tutorial.custom_strategy import CustomFedAdagrad
+
+from functools import partial
 
 # Create ServerApp
 app = ServerApp()
@@ -23,8 +25,15 @@ def main(grid: Grid, context: Context) -> None:
     print(f"Starting training for {num_rounds} rounds with initial lr={lr}")
 
     # Load global model
-    global_model = Net()
-    arrays = ArrayRecord(global_model.state_dict())
+
+    if context.run_config["model-type"] == "bn":
+        print('Server: Using BatchNorm model')
+        global_model = NetBN()
+    else:       
+        print('Server: Using standard model')
+        global_model = Net()
+
+    arrays = ArrayRecord(filter_state_dict(global_model.state_dict()))
 
     if context.run_config["strategy"] == "default":
         print("Using default FedAvg strategy.")
@@ -50,7 +59,7 @@ def main(grid: Grid, context: Context) -> None:
         initial_arrays=arrays,
         train_config=ConfigRecord({"lr": lr}),
         num_rounds=num_rounds,
-        evaluate_fn=global_evaluate,
+        evaluate_fn= partial(global_evaluate, model_type=context.run_config["model-type"]),
     )
 
     # Save final model to disk
@@ -58,14 +67,20 @@ def main(grid: Grid, context: Context) -> None:
     state_dict = result.arrays.to_torch_state_dict()
     torch.save(state_dict, "final_model.pt")
 
-def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
+def global_evaluate(server_round: int, arrays: ArrayRecord, model_type: str) -> MetricRecord:
     """Evaluate model on central data."""
 
     print(10*'=' + ' GLOBAL EVALUATE ' + 10*'=') 
 
     # Load the model and initialize it with the received weights
-    model = Net()
-    model.load_state_dict(arrays.to_torch_state_dict())
+    if model_type == "bn":
+        print('Server Eval: Using BatchNorm model')
+        model = NetBN()
+    else:       
+        print('Server Eval: Using standard model')   
+        model = Net()
+    
+    model.load_state_dict(filter_state_dict(arrays.to_torch_state_dict()))
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
@@ -78,3 +93,9 @@ def global_evaluate(server_round: int, arrays: ArrayRecord) -> MetricRecord:
     # Return the evaluation metrics
     return MetricRecord({"accuracy": test_acc, "loss": test_loss})
     
+
+def filter_state_dict(state_dict):
+    return {
+        k: v for k, v in state_dict.items()
+        if "num_batches_tracked" not in k
+    }

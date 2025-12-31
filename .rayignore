@@ -1,0 +1,9 @@
+.venv
+venv
+venv.tar.gz
+.git
+__pycache__
+*.pt
+*.pth
+*.ckpt
+*.zip
