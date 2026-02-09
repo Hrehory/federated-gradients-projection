@@ -136,3 +136,79 @@ def test(net, testloader, device):
     accuracy = correct / len(testloader.dataset)
     loss = loss / len(testloader)
     return loss, accuracy
+
+def compute_gradients(net, trainloader, epochs, device):
+    net.to(device)
+    net.train()
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+
+    grad_acc = {
+        name: torch.zeros_like(param, device=device)
+        for name, param in net.named_parameters()
+    }
+
+    total_loss = 0.0
+    steps = 0
+
+    for _ in range(epochs):
+        for batch in trainloader:
+            images = batch["img"].to(device)
+            labels = batch["label"].to(device)
+
+            net.zero_grad(set_to_none=True)
+            loss = criterion(net(images), labels)
+            loss.backward()
+
+            total_loss += loss.item()
+            steps += 1
+
+            for name, param in net.named_parameters():
+                if param.grad is not None:
+                    grad_acc[name] += param.grad.detach()
+
+    for k in grad_acc:
+        grad_acc[k] /= max(1, steps)
+
+    avg_loss = total_loss / max(1, steps)
+    return grad_acc, avg_loss, steps
+
+
+def local_train_and_return_delta(model, trainloader, epochs, lr, device):
+    model.to(device)
+    model.train()
+    criterion = torch.nn.CrossEntropyLoss().to(device)
+    opt = torch.optim.SGD(
+        model.parameters(),
+        lr=lr,
+        momentum=0.9,
+        weight_decay=5e-4,
+    )
+
+    # snapshot initial parameters
+    w0 = {k: v.detach().clone() for k, v in model.state_dict().items()}
+
+    total_loss = 0.0
+    steps = 0
+
+    for _ in range(epochs):
+        for batch in trainloader:
+            x = batch["img"].to(device)
+            y = batch["label"].to(device)
+
+            opt.zero_grad(set_to_none=True)
+            loss = criterion(model(x), y)
+            loss.backward()
+            opt.step()
+
+            total_loss += loss.item()
+            steps += 1
+
+    w1 = model.state_dict()
+
+    # delta for parameters only (named_parameters keys)
+    delta = {}
+    for name, p in model.named_parameters():
+        delta[name] = (w1[name] - w0[name]).detach()
+
+    avg_loss = total_loss / max(1, steps)
+    return delta, avg_loss, steps

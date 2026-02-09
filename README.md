@@ -3,6 +3,14 @@
 
 ## Badania
 
+### 9.02.2026
+
+Przerobienie kodu na przesyłanie gradientów i placeholder (projet_identity) na przyszłe badania dot. projekcji (dual cone)
+
+flwr run . --run-config="strategy='custom' lr=0.02 num-server-rounds=100 model-type='bn'"
+
+
+
 ### 31.12.2025
 
 Brak badań, poprawki, by działał Fedadagrad i by można było podać w cmd model-type='standard'/'bn':

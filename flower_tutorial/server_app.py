@@ -7,7 +7,7 @@ from flwr.serverapp.strategy import FedAvg
 
 from flower_tutorial.task import Net, NetBN, load_centralized_dataset, test
 
-from flower_tutorial.custom_strategy import CustomFedAdagrad
+from flower_tutorial.custom_strategy import CustomFedAdagrad, GradientFedAvg
 
 from functools import partial
 
@@ -45,12 +45,18 @@ def main(grid: Grid, context: Context) -> None:
         fraction_train: float = context.run_config["fraction-custom-train"]
         fraction_evaluate: float = context.run_config["fraction-custom-evaluate"]
 
-        strategy = CustomFedAdagrad(
-            fraction_train=fraction_train,
-            #fraction_evaluate=fraction_evaluate,
-            # min_train_nodes=20,  # Optional config
-            # min_evaluate_nodes=20,  # Optional config
-            # min_available_nodes=20,  # Optional config
+        # strategy = CustomFedAdagrad(
+        #     fraction_train=fraction_train,
+        #     #fraction_evaluate=fraction_evaluate,
+        #     # min_train_nodes=20,  # Optional config
+        #     # min_evaluate_nodes=20,  # Optional config
+        #     # min_available_nodes=20,  # Optional config
+        # )
+
+        strategy = GradientFedAvg(
+            lr=lr,
+            project_each_client=True,
+            project_agg=True,
         )
 
     # Start strategy, run FedAvg for `num_rounds`
