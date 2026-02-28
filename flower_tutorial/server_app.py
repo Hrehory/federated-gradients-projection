@@ -41,7 +41,7 @@ def main(grid: Grid, context: Context) -> None:
         fraction_train: float = context.run_config["fraction-train"]
         strategy = FedAvg(fraction_train=fraction_train)
     else:
-        print("Using CustomFedAdagrad strategy.")
+        print("Using Custom strategy.")
         fraction_train: float = context.run_config["fraction-custom-train"]
         fraction_evaluate: float = context.run_config["fraction-custom-evaluate"]
 

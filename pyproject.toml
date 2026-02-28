@@ -45,18 +45,34 @@ batch-size = 32
 model-type = "bn"  # "standard" or "bn"
 
 # Default federation to use when running the app
-[tool.flwr.federations]
-default = "local-simulation"
 
-# Local simulation federation with 10 virtual SuperNodes
-[tool.flwr.federations.local-simulation]
-options.num-supernodes = 20
+#######################################################################
+# CONFIGURATION MIGRATION NOTICE:
+#
+# What was previously called "federation config" for SuperLink
+# connections in pyproject.toml has been renamed and moved.
+#
+# These settings are now **SuperLink connection configuration**
+# and are defined in the Flower configuration file.
+#
+# The entries below are commented out intentionally and are kept
+# only as a migration reference.
+#
+# Docs: https://flower.ai/docs/framework/ref-flower-configuration.html
+#######################################################################
 
-# Remote federation example for use with SuperLink
-[tool.flwr.federations.remote-federation]
-address = "<SUPERLINK-ADDRESS>:<PORT>"
-insecure = true  # Remove this line to enable TLS
-# root-certificates = "<PATH/TO/ca.crt>"  # For TLS setup
+# [tool.flwr.federations]
+# default = "local-simulation"
+
+# # Local simulation federation with 10 virtual SuperNodes
+# [tool.flwr.federations.local-simulation]
+# options.num-supernodes = 20
+
+# # Remote federation example for use with SuperLink
+# [tool.flwr.federations.remote-federation]
+# address = "<SUPERLINK-ADDRESS>:<PORT>"
+# insecure = true  # Remove this line to enable TLS
+# # root-certificates = "<PATH/TO/ca.crt>"  # For TLS setup
 
 
 

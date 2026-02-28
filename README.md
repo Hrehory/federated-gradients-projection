@@ -1,103 +1,77 @@
 # flower-tutorial: A Flower / PyTorch app
 
+## Install dependencies and run
 
-## Badania
-
-### 9.02.2026
-
-Przerobienie kodu na przesyłanie gradientów i placeholder (projet_identity) na przyszłe badania dot. projekcji (dual cone)
-
-flwr run . --run-config="strategy='custom' lr=0.02 num-server-rounds=100 model-type='bn'"
-
-
-
-### 31.12.2025
-
-Brak badań, poprawki, by działał Fedadagrad i by można było podać w cmd model-type='standard'/'bn':
-
-flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3 model-type='standard'"
-
-
-
-### 30.12.2025
-
-Przy: flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3"
-
-Wszystko jest OK , natomiast:
-
-flwr run . --run-config="strategy='custom' lr=0.1 num-server-rounds=8"
-
-Model się nie trenuje dla przypadku bez BatchNorm.
-
-Co ciekawe, przy podmianie CustomFedAdagrad(FedAvg) -> CustomFedAdagrad(FedAdagrad), model z BatchNorm powoduje błąd:
-
-TypeError: Invalid arguments for Array. Expected either a PyTorch tensor, a NumPy ndarray, or explicit dtype/shape/stype/data values.
-
-
-## Install dependencies and project
-
-The dependencies are listed in the `pyproject.toml` and you can install them as follows:
-
-```bash
-~pip install -e .~
-
-uv pip install --no-cache "flwr[simulation]==1.25.0"
-
-uv pip install -e .
-
-
-cat > .rayignore <<EOF
-.venv
-venv
-venv.tar.gz
-.git
-__pycache__
-*.pt
-*.pth
-*.ckpt
-*.zip
-EOF
-
-
-```
-
-Można uruchomić:
+You can just type:
 
 ```bash
 uv run --active flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3 model-type='standard'" 
 ```
 
-lub:
+It will explicitly create a needed .venv (**more than 7GB!**).
 
-```bash
-flwr run . --run-config="strategy='custom' lr=0.01 num-server-rounds=3 model-type='standard'" 
+Once the `.venv` has been created - either by the command above or by `uv sync`, you can run the project using `launch.json`:
+
+
+```
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "name": "Launch flwr run",
+      "type": "python",
+      "request": "launch",
+      "python": "${workspaceFolder}/flower-tutorial/.venv/bin/python",
+      "program": "${workspaceFolder}/flower-tutorial/.venv/bin/flwr",
+      "args": [
+        "run",
+        ".",
+        "--run-config",
+        "strategy='custom' lr=0.01 num-server-rounds=3 model-type='standard'"
+      ],
+      "cwd": "${workspaceFolder}/flower-tutorial",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/flower-tutorial"
+      }
+    },
+
+
+
+    {
+      "name": "Attach to Flower Server",
+      "type": "python",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "justMyCode": false
+    }
+
+  ]
+}
+
 ```
 
+The expected structure of the project is as follows:
 
-> **Tip:** Your `pyproject.toml` file can define more than just the dependencies of your Flower app. You can also use it to specify hyperparameters for your runs and control which Flower Runtime is used. By default, it uses the Simulation Runtime, but you can switch to the Deployment Runtime when needed.
-> Learn more in the [TOML configuration guide](https://flower.ai/docs/framework/how-to-configure-pyproject-toml.html).
-
-## Run with the Simulation Engine
-
-In the `flower-tutorial` directory, use `flwr run` to run a local simulation:
-
-```bash
-flwr run .
 ```
-
-Refer to the [How to Run Simulations](https://flower.ai/docs/framework/how-to-run-simulations.html) guide in the documentation for advice on how to optimize your simulations.
-
-## Run with the Deployment Engine
-
-Follow this [how-to guide](https://flower.ai/docs/framework/how-to-run-flower-with-deployment-engine.html) to run the same app in this example but with Flower's Deployment Engine. After that, you might be interested in setting up [secure TLS-enabled communications](https://flower.ai/docs/framework/how-to-enable-tls-connections.html) and [SuperNode authentication](https://flower.ai/docs/framework/how-to-authenticate-supernodes.html) in your federation.
-
-You can run Flower on Docker too! Check out the [Flower with Docker](https://flower.ai/docs/framework/docker/index.html) documentation.
-
-## Resources
-
-- Flower website: [flower.ai](https://flower.ai/)
-- Check the documentation: [flower.ai/docs](https://flower.ai/docs/)
-- Give Flower a ⭐️ on GitHub: [GitHub](https://github.com/adap/flower)
-- Join the Flower community!
-  - [Flower Slack](https://flower.ai/join-slack/)
-  - [Flower Discuss](https://discuss.flower.ai/)
+├── flower-tutorial
+│   ├── final_model.pt
+│   ├── flower_tutorial
+│   │   ├── client_app.py
+│   │   ├── custom_strategy.py
+│   │   ├── __init__.py
+│   │   ├── server_app.py
+│   │   └── task.py
+│   ├── .gitignore
+│   ├── pyproject.toml
+│   ├── .rayignore
+│   ├── README.md
+│   └── Research.md
+└── .vscode
+    └── launch.json
+```

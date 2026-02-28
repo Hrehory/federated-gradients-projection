@@ -7,3 +7,7 @@ __pycache__
 *.pth
 *.ckpt
 *.zip
+.ipynb_checkpoints
+.env
+outputs/
+*.log
