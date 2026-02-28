@@ -75,3 +75,18 @@ The expected structure of the project is as follows:
 └── .vscode
     └── launch.json
 ```
+
+
+To debug the application, copy and paste the following snippet into `venv/lib/python3.13/site-packages/flwr/simulation/run_simulation.py`:
+
+
+```
+import debugpy
+print("DEBUGPY: starting listen")
+debugpy.listen(("0.0.0.0", 5678))
+print("DEBUGPY: waiting for client")
+debugpy.wait_for_client()
+print("DEBUGPY: attached")
+```
+
+Next, install the debugger by running `debugpy` by typing `uv pip install debugpy` and launch the application using `uv run --active ...`. Finally, attach the debugger to the Flower Server in VS Code by pressing `CTRL+SHIFT+D` and selecting your "Attach" profile.
